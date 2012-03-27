@@ -29,6 +29,9 @@ App.init = function() {
 		this._harmoniums.push(h);
 	}
 	document.body.appendChild(this._node);
+
+	var a = new Shape.Canvas("HI");
+	this.drawShape(a);
 	
 //	OZ.Touch.onActivate(document, this.go.bind(this));
 }
@@ -40,13 +43,26 @@ App.drawShape = function(shape, options) {
 	};
 	for (var p in options) { o[p] = options[p]; }
 	
+	/* get points from shape */
 	var points = shape.getPoints(this._harmoniums.length);
+	console.log("got", points.length, "points");
+	if (!points.length) { return false; }
+
+	/* normalnize, center, scale */
 	points = this._adjust(points, o);
 	
+	/* add to match number of harmoniums */
+	var index = 0;
+	while (points.length < this._harmoniums.length) { 
+		points.push(points[index++]);
+	}
+	
+	/* adjust harmoniums */
 	for (var i=0;i<points.length;i++) {
 		this._harmoniums[i].setPosition(points[i]);
 	}
 	
+	return true;
 }
 
 App._resize = function() {
@@ -104,29 +120,9 @@ App._adjust = function(points, options) {
 			p[j] += offset[j];
 		}
 //		console.log("to", p.join());
-		
-		
 	}
 	
 	return points;
-}
-
-App.go = function() {
-/*	var win = OZ.DOM.win();
-	for (var i=0;i<this._harmoniums.length;i++) {
-		var x = Math.round(Math.random()*win[0]);
-		var y = Math.round(Math.random()*win[1]);
-		this._harmoniums[i].setPosition([x, y]);
-	}
-	*/
-	
-	var p1 = [0, Math.random() > 0.5 ? 1 : 0];
-	var p2 = [1, Math.random() > 0.5 ? 1 : 0];
-	var line = new Shape.Line(p1, p2);
-//	this.drawShape(line);
-	
-	var a = new Shape.Canvas("A");
-	this.drawShape(a);
 }
 
 App._keypress = function(e) {

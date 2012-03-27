@@ -50,6 +50,13 @@ Shape.Canvas.prototype.init = function(str) {
 //	document.body.appendChild(canvas);
 }
 
+var TS = null;
+var LOG = function() {
+	var ts = Date.now();
+	if (TS) { console.log(ts-TS); }
+	TS = ts;
+}
+
 Shape.Canvas.prototype.getPoints = function(count) {
 	var remain = count;
 	var results = [];
@@ -61,8 +68,8 @@ Shape.Canvas.prototype.getPoints = function(count) {
 	];
 	
 	while (remain) {
-		var tmpResults = [];
 		var newStack = [];
+		
 		while (stack.length) {
 			var item = stack.pop();
 	/*		
@@ -76,34 +83,28 @@ Shape.Canvas.prototype.getPoints = function(count) {
 				Math.round((item[1]+item[3])/2)
 			];
 			
+			
 			var index = center[0] + width*center[1];
 			var color = imageData.data[4*index + 3];
 			if (color == 255) {
-				tmpResults.push(center);
 //				this._context.fillStyle = "red";
 //				this._context.fillRect(center[0], center[1], 3, 3);
-				
+				results.push(center);
+				remain--;
+				if (!remain) { break; }			
 			} else {
 //				this._context.fillStyle = "green";
 //				this._context.fillRect(center[0], center[1], 3, 3);
 			}
 			
-			var todo = [];
-			todo.push([item[0],   item[1],   center[0], center[1]]); /* top left */
-			todo.push([center[0], item[1],   item[2],   center[1]]); /* top right */
-			todo.push([item[0],   center[1], center[0], item[3]]); /* bottom left */
-			todo.push([center[0], center[1], item[2],   item[3]]); /* bottom right */
-			
-			newStack = newStack.concat(todo.randomize());
+			if (center[0]-item[0] >= 2 && center[1]-item[1] >= 2) { newStack.push([item[0],   item[1],   center[0], center[1]]); } /* top left */
+			if (item[2]-center[0] >= 2 && center[1]-item[1] >= 2) { newStack.push([center[0], item[1],   item[2],   center[1]]); } /* top right */
+			if (center[0]-item[0] >= 2 && item[3]-center[1] >= 2) { newStack.push([item[0],   center[1], center[0], item[3]]); } /* bottom left */
+			if (item[2]-center[0] >= 2 && item[3]-center[1] >= 2) { newStack.push([center[0], center[1], item[2],   item[3]]); } /* bottom right */
 		}
 		
-		tmpResults = tmpResults.randomize();
-		while (remain && tmpResults.length) {
-			results.push(tmpResults.pop());
-			remain--;
-		}
-		
-		stack = newStack;
+		stack = newStack.randomize();
+		if (!stack.length) { break; }
 	}
 	
 	return results;

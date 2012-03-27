@@ -52,11 +52,10 @@ Harmonium.prototype._fromRange = function(range) {
 }
 
 Harmonium.prototype._sync = function() {
-	if (0*1) {
-		OZ.CSS3.set(this._node, "transform", "translate(" + (this._position[0] - this._radius) + "px, " + (this._position[1] - this._radius) + "px)");
-	} else {
-		this._node.style.left = (this._position[0] - this._radius) + "px";
-		this._node.style.top = (this._position[1] - this._radius) + "px";
-	}
+	/* SLOW
+	OZ.CSS3.set(this._node, "transform", "translate(" + (this._position[0] - this._radius) + "px, " + (this._position[1] - this._radius) + "px)");
+	*/
+	this._node.style.left = (this._position[0] - this._radius) + "px";
+	this._node.style.top = (this._position[1] - this._radius) + "px";
 	this._node.style.borderWidth = this._radius + "px";
 }
