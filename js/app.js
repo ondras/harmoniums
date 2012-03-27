@@ -45,7 +45,6 @@ App.drawShape = function(shape, options) {
 	
 	/* get points from shape */
 	var points = shape.getPoints(this._harmoniums.length);
-	console.log("got", points.length, "points");
 	if (!points.length) { return false; }
 
 	/* normalnize, center, scale */
@@ -57,12 +56,103 @@ App.drawShape = function(shape, options) {
 		points.push(points[index++]);
 	}
 	
+	points = this._sort(points);
+	
 	/* adjust harmoniums */
 	for (var i=0;i<points.length;i++) {
 		this._harmoniums[i].setPosition(points[i]);
 	}
 	
 	return true;
+}
+
+App._sort = function(points) {
+	/*
+	var cnt = this._harmoniums.length;
+	var result = new Array(cnt);
+
+	var distances = [];
+//	console.log("requested", points);
+
+	for (var i=0;i<cnt;i++) {
+		var h = this._harmoniums[i];
+		var pos = h.getPosition();
+//		console.log("harmonium", i, "at", pos);
+		var dist = Infinity;
+		var pointIndex = -1;
+
+		for (var j=0;j<cnt;j++) {
+			var point = points[j];
+			var dx = point[0]-pos[0];
+			var dy = point[1]-pos[1];
+			var d = dx*dx+dy*dy;
+			if (d < dist) { 
+				dist = d; 
+				pointIndex = j;
+			}
+		}
+		
+		distances.push({
+			index: i,
+			dist: dist,
+			pointIndex: pointIndex
+		});
+	}
+	
+	distances.sort(function(a, b) {
+		return b.dist - a.dist;
+	});
+	
+//	console.log("distances", distances);
+
+	for (var i=0;i<cnt;i++) {
+		var index = distances[i].index;
+		var dist = Infinity;
+		var h = this._harmoniums[index];
+		var pos = h.getPosition();
+		var pointIndex = -1;
+		
+		for (var j=0;j<cnt-i;j++) {
+			var point = points[j];
+			var dx = point[0]-pos[0];
+			var dy = point[1]-pos[1];
+			var d = dx*dx+dy*dy;
+			if (d < dist) {
+				dist = d;
+				pointIndex = j;
+			}
+		}
+		
+//		console.log("moving", pos, "by", dist);
+		result[index] = points[pointIndex];
+		points.splice(pointIndex, 1);
+	}
+	
+	return result;
+	*/
+	
+	
+	var result = [];
+	var cnt = this._harmoniums.length;
+	for (var i=0;i<cnt;i++) {
+		var pos = this._harmoniums[i].getPosition();
+		var dist = Infinity;
+		var index = -1;
+		for (var j=0;j<cnt-i;j++) {
+			var point = points[j];
+			var dx = point[0]-pos[0];
+			var dy = point[1]-pos[1];
+			var d = dx*dx+dy*dy;
+			if (d < dist) {
+				dist = d;
+				index = j;
+			}
+		}
+		result.push(points[index]);
+		points.splice(index, 1);
+	}
+	
+	return result;
 }
 
 App._resize = function() {

@@ -12,10 +12,10 @@ Harmonium.prototype.init = function(parent) {
 	
 	this._range = {
 		radius: [15, 30],
-		opacity:[0.6, 0.9],
-		red: [0, 30],
-		green: [50, 150],
-		blue: [230, 255],
+		opacity: [0.4, 0.9],
+		red: [0, 50],
+		green: [50, 200],
+		blue: [200, 255],
 		position: [-5, 5]
 	};
 	
