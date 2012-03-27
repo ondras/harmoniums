@@ -18,21 +18,26 @@ var App = {
 };
 
 App.init = function() {
-	this._node = OZ.DOM.elm("div", {position:"absolute", left:this._padding + "px", top:this._padding+"px"});
+	this._node = OZ.DOM.elm("div", {position:"absolute", left:this._padding + "px", top:this._padding+"px", opacity:0});
+	OZ.CSS3.set(this._node, "transition", "opacity 1000ms");
 	
 	OZ.Event.add(window, "resize", this._resize.bind(this));
 	OZ.Event.add(document, "keypress", this._keypress.bind(this));
+	
+	document.body.appendChild(this._node);
 	this._resize();
+	var size = [this._node.offsetWidth, this._node.offsetHeight];
 
 	for (var i=0;i<500;i++) {
 		var h = new Harmonium(this._node);
+		h.setPosition([Math.random()*size[0], Math.random()*size[1]]);
 		this._harmoniums.push(h);
 	}
-	document.body.appendChild(this._node);
-
-	var a = new Shape.Canvas("HI");
-	this.drawShape(a);
 	
+	setTimeout(function(){
+		this._node.style.opacity = 1;
+	}.bind(this), 2000);
+
 //	OZ.Touch.onActivate(document, this.go.bind(this));
 }
 
@@ -216,6 +221,7 @@ App._adjust = function(points, options) {
 }
 
 App._keypress = function(e) {
+	OZ.Event.prevent(e);
 	var str = String.fromCharCode(e.charCode);
 	var a = new Shape.Canvas(str);
 	this.drawShape(a);
