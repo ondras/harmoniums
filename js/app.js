@@ -221,7 +221,6 @@ App._adjust = function(points, options) {
 }
 
 App._keypress = function(e) {
-	OZ.Event.prevent(e);
 	var str = String.fromCharCode(e.charCode);
 	var a = new Shape.Canvas(str);
 	this.drawShape(a);
