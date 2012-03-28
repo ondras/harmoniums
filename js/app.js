@@ -336,5 +336,9 @@ App._phrases = [
 	["☺", "☻", "☹"],
 	["WTF", "OMG", "LOL"],
 	["To", "be", "or", "not", "to", "be"],
-	["Sůl", "nad", "zlato"]
+	["Sůl", "nad", "zlato"],
+	["The", "truth", "is", "out", "there"],
+	["Pravda", "vítězí"],
+	["My", "name", "is", "Indrid", "Cold"],
+	["The", "killed", "Kenny"]
 ];
