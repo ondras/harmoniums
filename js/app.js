@@ -340,5 +340,8 @@ App._phrases = [
 	["The", "truth", "is", "out", "there"],
 	["Pravda", "vítězí"],
 	["My", "name", "is", "Indrid", "Cold"],
-	["The", "killed", "Kenny"]
+	["The", "killed", "Kenny"],
+	["I", "know", "what", "you", "did"],
+	["Velký", "bratr", "tě", "vidí"],
+	["Malý", "bratr", "tě", "vidí"]
 ];
