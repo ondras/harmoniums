@@ -31,6 +31,37 @@ Shape.Line.prototype.getPoints = function(count) {
 	return results;
 }
 
+Shape.Random = OZ.Class().extend(Shape);
+Shape.Random.prototype.init = function(node) {
+	this._node = node;
+}
+Shape.Random.prototype.getPoints = function(count) {
+	var size = [this._node.offsetWidth, this._node.offsetHeight];
+	var results = [];
+	for (var i=0;i<count;i++) {
+		var point = [Math.random()*size[0], Math.random()*size[1]];
+		results.push(point);
+	}
+	return results;
+}
+
+Shape.Spiral = OZ.Class().extend(Shape);
+Shape.Spiral.prototype.init = function(rotations) {
+	this._rotations = rotations || 2;
+}
+Shape.Spiral.prototype.getPoints = function(count) {
+	var results = [];
+	var total = 2*Math.PI*this._rotations;
+	for (var i=0;i<count;i++) {
+		var angle = i*total/count;
+		var dist = i*10/count;
+		var x = Math.cos(angle) * dist;
+		var y = Math.sin(angle) * dist;
+		results.push([x, y]);
+	}
+	return results;
+}
+
 Shape.Canvas = OZ.Class().extend(Shape);
 Shape.Canvas.prototype.init = function(str) {
 	var size = [1, 200];

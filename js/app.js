@@ -13,35 +13,31 @@ Array.prototype.randomize = function() {
 
 var App = {
 	_harmoniums: [],
-	_padding: 30,
-	_node: null
+	_padding: 50,
+	_node: null,
+	_word: "",
+	_wordMode: false,
+	_phrases: [],
+	_timeout: null,
+	_randomPhrase: null,
+	_randomWord: -1
 };
 
 App.init = function() {
 	this._node = OZ.DOM.elm("div", {position:"absolute", left:this._padding + "px", top:this._padding+"px", opacity:0});
 	OZ.CSS3.set(this._node, "transition", "opacity 1000ms");
 	
-	OZ.Event.add(window, "resize", this._resize.bind(this));
-	OZ.Event.add(document, "keypress", this._keypress.bind(this));
-	
-	document.body.appendChild(this._node);
 	this._resize();
-	var size = [this._node.offsetWidth, this._node.offsetHeight];
-
-	for (var i=0;i<500;i++) {
-		var h = new Harmonium(this._node);
-		h.setPosition([Math.random()*size[0], Math.random()*size[1]]);
-		this._harmoniums.push(h);
-	}
 	
-	setTimeout(function(){
-		this._node.style.opacity = 1;
-	}.bind(this), 2000);
-
-//	OZ.Touch.onActivate(document, this.go.bind(this));
+	var all = document.getElementsByTagName("a");
+	for (var i=0;i<all.length;i++) {
+		if (all[i].getAttribute("data-count")) { OZ.Touch.onActivate(all[i], this._build.bind(this)); }
+	}
 }
 
 App.drawShape = function(shape, options) {
+	this._resize();
+
 	var o = {
 		center: true, /* center to viewport */
 		scale: true /* scale to fit viewport */
@@ -69,6 +65,28 @@ App.drawShape = function(shape, options) {
 	}
 	
 	return true;
+}
+
+App._build = function(e) {
+	OZ.Event.prevent(e);
+	document.body.innerHTML = "";
+	document.body.appendChild(this._node);
+	var target = OZ.Event.target(e);
+	var count = parseInt(target.getAttribute("data-count"));
+
+	for (var i=0;i<count;i++) {
+		var h = new Harmonium(this._node);
+		this._harmoniums.push(h);
+	}
+	this.drawShape(new Shape.Random(this._node));
+	
+	setTimeout(function(){
+		this._node.style.opacity = "";
+		OZ.Touch.onActivate(document, this._activate.bind(this));
+	}.bind(this), 500);
+	
+	OZ.Event.add(document, "keypress", this._keypress.bind(this));
+	this._scheduleRandom();
 }
 
 App._sort = function(points) {
@@ -208,20 +226,111 @@ App._adjust = function(points, options) {
 	
 	for (var i=0;i<l;i++) {
 		var p = points[i];
-//		console.log("shifting", p.join());
 		for (var j=0;j<2;j++) {
 			p[j] -= min[j];
 			p[j] *= finalScale;
 			p[j] += offset[j];
 		}
-//		console.log("to", p.join());
 	}
 	
 	return points;
 }
 
 App._keypress = function(e) {
-	var str = String.fromCharCode(e.charCode);
-	var a = new Shape.Canvas(str);
-	this.drawShape(a);
+	this._randomPhrase = null;
+	this._scheduleRandom();
+
+	if (e.keyCode == 13) {
+		if (this._wordMode && this._word) {
+			var a = new Shape.Canvas(this._word);
+			this.drawShape(a);
+		}
+		this._word = "";
+		this._wordMode = !this._wordMode;
+		return;
+	}
+	
+	var ch = e.charCode;
+	if (!ch) { return; }
+	
+	if (ch == 32) {
+		this._random();
+		return;
+	}
+	
+	if (this._wordMode) {
+		this._word += String.fromCharCode(ch);
+	} else {
+		var str = String.fromCharCode(ch);
+		var a = new Shape.Canvas(str);
+		this.drawShape(a);
+	}
+	
 }
+
+App._activate = function(e) {
+	this._randomPhrase = null;
+	this._random();
+}
+
+App._scheduleRandom = function() {
+	if (this._timeout) { clearTimeout(this._timeout); }
+	var delay = (this._randomPhrase ? 2000 : 8000);
+	this._timeout = setTimeout(this._random.bind(this), delay);
+}
+
+App._random = function() {
+	clearTimeout(this._timeout);
+	this._timeout = null;
+
+	if (!this._randomPhrase) { 
+		this._randomPhrase = this._phrases.random(); 
+		this._randomWord = 0;
+	}
+	
+	if (this._randomWord == this._randomPhrase.length) { /* end with random dots */
+		this._randomPhrase = null;
+		if (Math.random() > 0.5) {
+			var shape = new Shape.Random(this._node);
+		} else {
+			var shape = new Shape.Spiral(3);
+		}
+		this.drawShape(shape);
+	} else { /* draw next word */
+		var word = this._randomPhrase[this._randomWord];
+		var a = new Shape.Canvas(word);
+		this.drawShape(a);
+		this._randomWord++;
+	}
+	
+	this._scheduleRandom();
+}
+
+App._phrases = [
+	["We", "come", "in", "peace"],
+	["The", "answer", "is", "42"],
+	["Elvis", "is", "not", "dead"],
+	["I", "see", "you"],
+	["Alea", "iacta", "est"],
+	["All", "work", "no", "play"],
+	["Make", "love", "not", "war"],
+	["The", "cake", "is", "a", "lie"],
+	["1+1", "=", "?"],
+	["I", "love", "bacon"],
+	["Cheap", "viagra", "on", "sale"],
+	["You", "have", "my", "sword"],
+	["All", "your", "base", "are", "belong", "to", "us"],
+	["This", "is", "Sparta"],
+	["Hello", "world"],
+	["Seznam", "dot", "cz"],
+	["iddqd", "idkfa"],
+	["caune", "pancau", "neasi"],
+	["I", "love", "you"],
+	["I", "see", "dead", "people"],
+	["I", "am", "your", "father"],
+	["Use", "the", "force", "Luke"],
+	["Roses", "are", "red"],
+	["Houston", "we", "have", "a", "problem"],
+	["May", "the", "force", "be", "with", "you"],
+	["Have", "you", "seen", "my", "dog", "?"]
+];
