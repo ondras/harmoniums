@@ -250,7 +250,7 @@ App._keypress = function(e) {
 		return;
 	}
 	
-	if (e.keyCode == 32) {
+	if (e.charCode == 32 || e.keyCode == 32) {
 		this._random();
 		return;
 	}
