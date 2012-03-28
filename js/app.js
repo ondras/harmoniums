@@ -250,13 +250,13 @@ App._keypress = function(e) {
 		return;
 	}
 	
-	var ch = e.charCode;
-	if (!ch) { return; }
-	
-	if (ch == 32) {
+	if (e.keyCode == 32) {
 		this._random();
 		return;
 	}
+
+	var ch = e.charCode;
+	if (!ch) { return; }
 	
 	if (this._wordMode) {
 		this._word += String.fromCharCode(ch);
