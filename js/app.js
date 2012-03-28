@@ -332,5 +332,7 @@ App._phrases = [
 	["Roses", "are", "red"],
 	["Houston", "we", "have", "a", "problem"],
 	["May", "the", "force", "be", "with", "you"],
-	["Have", "you", "seen", "my", "dog", "?"]
+	["Have", "you", "seen", "my", "dog", "?"],
+	["☺", "☻", "☹"],
+	["WTF", "OMG", "LOL"]
 ];
