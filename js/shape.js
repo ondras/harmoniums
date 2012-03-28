@@ -63,9 +63,10 @@ Shape.Spiral.prototype.getPoints = function(count) {
 }
 
 Shape.Canvas = OZ.Class().extend(Shape);
+Shape.Canvas.FAMILY = "sans-serif";
 Shape.Canvas.prototype.init = function(str) {
 	var size = [1, 200];
-	var family = "sans-serif";
+	var family = this.constructor.FAMILY;
 	
 	var canvas = OZ.DOM.elm("canvas", {width:size[0], height:1.5*size[1]});
 	this._context = canvas.getContext("2d");
