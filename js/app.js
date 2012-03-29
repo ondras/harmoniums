@@ -282,27 +282,33 @@ App._scheduleRandom = function() {
 App._random = function() {
 	clearTimeout(this._timeout);
 	this._timeout = null;
+	
+	var shape = null;
 
-	if (!this._randomPhrase) { 
-		this._randomPhrase = this._phrases.random(); 
-		this._randomWord = 0;
-	}
-	
-	if (this._randomWord == this._randomPhrase.length) { /* end with random dots */
-		this._randomPhrase = null;
-		if (Math.random() > 0.5) {
-			var shape = new Shape.Random(this._node);
-		} else {
-			var shape = new Shape.Spiral(3);
+	if (!this._randomPhrase) { /* pick something new */
+		if (Math.random() > 0.33) { /* start new phrase */
+			this._randomPhrase = this._phrases.random(); 
+			this._randomWord = 0;
+		} else { /* start new symbol */
+			if (Math.random() > 0.8) {
+				shape = new Shape.Spiral(1 + Math.floor(Math.random()*4));
+			} else {
+				shape = new Shape.Symbol();
+			}
 		}
-		this.drawShape(shape);
-	} else { /* draw next word */
-		var word = this._randomPhrase[this._randomWord];
-		var a = new Shape.Canvas(word);
-		this.drawShape(a);
-		this._randomWord++;
 	}
 	
+	if (this._randomPhrase) { /* pick a word or end phrase */
+		if (this._randomWord == this._randomPhrase.length) { /* end with random dots */
+			this._randomPhrase = null;
+			shape = new Shape.Random(this._node);
+		} else { /* draw next word */
+			shape = new Shape.Canvas(this._randomPhrase[this._randomWord]);
+			this._randomWord++;
+		}
+	}
+		
+	this.drawShape(shape);
 	this._scheduleRandom();
 }
 
@@ -333,15 +339,15 @@ App._phrases = [
 	["Houston", "we", "have", "a", "problem"],
 	["May", "the", "force", "be", "with", "you"],
 	["Have", "you", "seen", "my", "dog", "?"],
-	["☺", "☻", "☹"],
 	["WTF", "OMG", "LOL"],
 	["To", "be", "or", "not", "to", "be"],
 	["Sůl", "nad", "zlato"],
 	["The", "truth", "is", "out", "there"],
 	["Pravda", "vítězí"],
 	["My", "name", "is", "Indrid", "Cold"],
-	["The", "killed", "Kenny"],
+	["They", "killed", "Kenny"],
 	["I", "know", "what", "you", "did"],
 	["Velký", "bratr", "tě", "vidí"],
-	["Malý", "bratr", "tě", "vidí"]
+	["Malý", "bratr", "tě", "vidí"],
+	["Why", "is", "the", "rum", "always", "gone"]
 ];

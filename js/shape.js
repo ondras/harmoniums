@@ -47,7 +47,7 @@ Shape.Random.prototype.getPoints = function(count) {
 
 Shape.Spiral = OZ.Class().extend(Shape);
 Shape.Spiral.prototype.init = function(rotations) {
-	this._rotations = rotations || 2;
+	this._rotations = rotations || 3;
 }
 Shape.Spiral.prototype.getPoints = function(count) {
 	var results = [];
@@ -140,4 +140,10 @@ Shape.Canvas.prototype.getPoints = function(count) {
 	}
 	
 	return results;
+}
+
+Shape.Symbol = OZ.Class().extend(Shape.Canvas);
+Shape.Symbol.prototype.init = function() {
+	var symbols = ["☺", "♥", "☮", "☢", "★", "☯", "♩", "⚫"];
+	Shape.Canvas.prototype.init.call(this, symbols.random());
 }
