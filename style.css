@@ -56,10 +56,25 @@ body #content div:first-child {
 	margin-right: 10%;
 }
 
- #content div:last-child {
+#content div:last-child {
 	margin-left: 10%;
 }
 
 body #content li {
 	margin: 1em 0em;
+}
+
+#harmoniums {
+	position: absolute;
+	-webkit-transition: opacity 1s;
+	-moz-transition: opacity 1s;
+	transition: opacity 1s;
+}
+
+#harmoniums div {
+	position: absolute;
+	-webkit-transition: all 1s ease-out;
+	-moz-transition: all 1s ease-out;
+	transition: all 1s ease-out;
+	border-radius: 50%;
 }

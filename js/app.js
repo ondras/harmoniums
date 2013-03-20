@@ -24,8 +24,7 @@ var App = {
 };
 
 App.init = function() {
-	this._node = OZ.DOM.elm("div", {position:"absolute", left:this._padding + "px", top:this._padding+"px", opacity:0});
-	OZ.CSS3.set(this._node, "transition", "opacity 1000ms");
+	this._node = OZ.DOM.elm("div", {id:"harmoniums", left:this._padding + "px", top:this._padding+"px", opacity:0});
 	
 	this._resize();
 	
@@ -69,13 +68,14 @@ App.drawShape = function(shape, options) {
 
 App._build = function(e) {
 	OZ.Event.prevent(e);
+	var useTransform = document.querySelector("#transform").checked;
 	document.body.innerHTML = "";
 	document.body.appendChild(this._node);
 	var target = OZ.Event.target(e);
 	var count = parseInt(target.getAttribute("data-count"));
 
 	for (var i=0;i<count;i++) {
-		var h = new Harmonium(this._node);
+		var h = new Harmonium(this._node, useTransform);
 		this._harmoniums.push(h);
 	}
 	this.drawShape(new Shape.Random(this._node));
