@@ -46,7 +46,7 @@ App.handleEvent = function(e) {
 			document.body.innerHTML = "";
 			document.body.appendChild(this._render.getNode());
 
-			this.drawShape(new Shape.Canvas("a"));
+			this.drawShape(new Shape.Random());
 			
 			document.addEventListener("keypress", this);
 			this._scheduleRandom();
