@@ -112,8 +112,6 @@ Shape.Canvas.prototype.getPoints = function(count) {
 
 	}
 
-	console.log("index", index);
-	
 	return results;
 }
 
