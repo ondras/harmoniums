@@ -12,7 +12,8 @@ Array.prototype.randomize = function() {
 }
 
 var App = {
-	_harmoniums: [],
+	_render: null,
+	_count: 0,
 	_padding: 50,
 	_node: null,
 	_word: "",
@@ -24,137 +25,40 @@ var App = {
 };
 
 App.init = function() {
-	this._node = OZ.DOM.elm("div", {id:"harmoniums", left:this._padding + "px", top:this._padding+"px", opacity:0});
-	
-	this._resize();
-	
-	var all = document.getElementsByTagName("a");
+	var all = document.querySelectorAll("a[data-count]");
 	for (var i=0;i<all.length;i++) {
-		if (all[i].getAttribute("data-count")) { OZ.Touch.onActivate(all[i], this._build.bind(this)); }
+		all[i].addEventListener("click", this);
 	}
 }
 
-App.drawShape = function(shape, options) {
-	this._resize();
-
-	var o = {
-		center: true, /* center to viewport */
-		scale: true /* scale to fit viewport */
-	};
-	for (var p in options) { o[p] = options[p]; }
-	
-	/* get points from shape */
-	var points = shape.getPoints(this._harmoniums.length);
-	if (!points.length) { return false; }
-
-	/* normalnize, center, scale */
-	points = this._adjust(points, o);
-	
-	/* add to match number of harmoniums */
-	var index = 0;
-	while (points.length < this._harmoniums.length) { 
-		points.push(points[index++]);
-	}
-	
-	points = this._sort(points);
-	
-	/* adjust harmoniums */
-	for (var i=0;i<points.length;i++) {
-		this._harmoniums[i].setPosition(points[i]);
-	}
-	
-	return true;
+App.drawShape = function(shape) {
+	var points = shape.getPoints(this._count);
+	this._render.setPosition(points);
 }
 
-App._build = function(e) {
-	OZ.Event.prevent(e);
-	var useTransform = document.querySelector("#transform").checked;
-	document.body.innerHTML = "";
-	document.body.appendChild(this._node);
-	var target = OZ.Event.target(e);
-	var count = parseInt(target.getAttribute("data-count"));
+App.handleEvent = function(e) {
+	switch (e.type) {
+		case "click":
+			e.preventDefault();
 
-	for (var i=0;i<count;i++) {
-		var h = new Harmonium(this._node, useTransform);
-		this._harmoniums.push(h);
+			this._count = parseInt(e.target.getAttribute("data-count"));
+			this._render = new Render(this._count);
+			document.body.innerHTML = "";
+			document.body.appendChild(this._render.getNode());
+
+			this.drawShape(new Shape.Canvas("a"));
+			
+			document.addEventListener("keypress", this);
+			this._scheduleRandom();
+		break;
+
+		case "keypress":
+			this._keypress(e);
+		break;
 	}
-	this.drawShape(new Shape.Random(this._node));
-	
-	setTimeout(function(){
-		this._node.style.opacity = "";
-		OZ.Touch.onActivate(document, this._activate.bind(this));
-	}.bind(this), 500);
-	
-	OZ.Event.add(document, "keypress", this._keypress.bind(this));
-	this._scheduleRandom();
 }
-
+/*
 App._sort = function(points) {
-	/*
-	var cnt = this._harmoniums.length;
-	var result = new Array(cnt);
-
-	var distances = [];
-//	console.log("requested", points);
-
-	for (var i=0;i<cnt;i++) {
-		var h = this._harmoniums[i];
-		var pos = h.getPosition();
-//		console.log("harmonium", i, "at", pos);
-		var dist = Infinity;
-		var pointIndex = -1;
-
-		for (var j=0;j<cnt;j++) {
-			var point = points[j];
-			var dx = point[0]-pos[0];
-			var dy = point[1]-pos[1];
-			var d = dx*dx+dy*dy;
-			if (d < dist) { 
-				dist = d; 
-				pointIndex = j;
-			}
-		}
-		
-		distances.push({
-			index: i,
-			dist: dist,
-			pointIndex: pointIndex
-		});
-	}
-	
-	distances.sort(function(a, b) {
-		return b.dist - a.dist;
-	});
-	
-//	console.log("distances", distances);
-
-	for (var i=0;i<cnt;i++) {
-		var index = distances[i].index;
-		var dist = Infinity;
-		var h = this._harmoniums[index];
-		var pos = h.getPosition();
-		var pointIndex = -1;
-		
-		for (var j=0;j<cnt-i;j++) {
-			var point = points[j];
-			var dx = point[0]-pos[0];
-			var dy = point[1]-pos[1];
-			var d = dx*dx+dy*dy;
-			if (d < dist) {
-				dist = d;
-				pointIndex = j;
-			}
-		}
-		
-//		console.log("moving", pos, "by", dist);
-		result[index] = points[pointIndex];
-		points.splice(pointIndex, 1);
-	}
-	
-	return result;
-	*/
-	
-	
 	var result = [];
 	var cnt = this._harmoniums.length;
 	for (var i=0;i<cnt;i++) {
@@ -177,65 +81,7 @@ App._sort = function(points) {
 	
 	return result;
 }
-
-App._resize = function() {
-	var win = OZ.DOM.win(true);
-	win[0] -= 2*this._padding;
-	win[1] -= 2*this._padding;
-	this._node.style.width = win[0]+"px";
-	this._node.style.height = win[1]+"px";
-}
-
-App._adjust = function(points, options) {
-	var min = [Infinity, Infinity];
-	var max = [-Infinity, -Infinity];
-	var l = points.length;
-	
-	/* find extremes */
-	for (var i=0;i<l;i++) {
-		var p = points[i];
-		for (var j=0;j<2;j++) {
-			min[j] = Math.min(min[j], p[j]);
-			max[j] = Math.max(max[j], p[j]);
-		}
-	}
-	
-	/* compute scale */
-	var win = [this._node.offsetWidth, this._node.offsetHeight];
-	var size = [0, 0];
-	var finalScale = Infinity;
-
-	for (var i=0;i<2;i++) {
-		size[i] = max[i]-min[i];
-		if (!size[i]) { continue; }
-		
-		var scale = win[i]/size[i];
-		if (scale < finalScale) { finalScale = scale; }
-	}
-	
-	if (finalScale == Infinity || !options.scale) { finalScale = 1; }
-
-	/* compute offset */
-	var offset = [0, 0];
-	if (options.center) {
-		for (var i=0;i<2;i++) {
-			offset[i] = (win[i]-size[i]*finalScale)/2;
-		}
-	}
-
-	
-	for (var i=0;i<l;i++) {
-		var p = points[i];
-		for (var j=0;j<2;j++) {
-			p[j] -= min[j];
-			p[j] *= finalScale;
-			p[j] += offset[j];
-		}
-	}
-	
-	return points;
-}
-
+*/
 App._keypress = function(e) {
 	this._randomPhrase = null;
 	this._scheduleRandom();
@@ -291,7 +137,7 @@ App._random = function() {
 			this._randomWord = 0;
 		} else { /* start new symbol */
 			if (Math.random() > 0.8) {
-				shape = new Shape.Spiral(1 + Math.floor(Math.random()*4));
+				shape = new Shape.Spiral(3 + Math.floor(Math.random()*4));
 			} else {
 				shape = new Shape.Symbol();
 			}
@@ -301,7 +147,7 @@ App._random = function() {
 	if (this._randomPhrase) { /* pick a word or end phrase */
 		if (this._randomWord == this._randomPhrase.length) { /* end with random dots */
 			this._randomPhrase = null;
-			shape = new Shape.Random(this._node);
+			shape = new Shape.Random();
 		} else { /* draw next word */
 			shape = new Shape.Canvas(this._randomPhrase[this._randomWord]);
 			this._randomWord++;

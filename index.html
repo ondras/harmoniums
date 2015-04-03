@@ -3,28 +3,25 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>Harmoniums of Mercury</title>
-		<script src="js/oz.js"></script>
-		<script src="js/css3.oz.js"></script>
-		<script src="js/touch.oz.js"></script>
-		<script src="js/harmonium.js"></script>
+		<script src="js/program.js"></script>
+		<script src="js/render.js"></script>
 		<script src="js/app.js"></script>
 		<script src="js/shape.js"></script>
 		<link rel="stylesheet" href="style.css" />
 		<meta name="viewport" content="width=device-width" />
 	</head>
-	<body onload="App.init()">
+	<body>
 		<div id="content">
 			<h1>Harmoniums of Mercury</h1>
-			<label><input id="transform" type="checkbox" checked="checked" />Use CSS transforms</label>
 			<p>
-				<a href="#" data-count="200">Slow computer (200&nbsp;harmoniums)</a>
-				<a href="#" data-count="500">Normal computer (500&nbsp;harmoniums)</a>
-				<a href="#" data-count="1000">Fast computer (1000&nbsp;harmoniums)</a>
+				<a href="#" data-count="1000">Slow computer (1k&nbsp;harmoniums)</a>
+				<a href="#" data-count="5000">Normal computer (5k&nbsp;harmoniums)</a>
+				<a href="#" data-count="10000">Fast computer (10k&nbsp;harmoniums)</a>
 			</p>
 			<div>
 				<h2>How to use</h2>
 				<ul>
-					<li>Press keys to visualize individual characters</li>
+					<li>Type stuff! Press keys to visualize individual characters</li>
 					<li>Press <code>&lt;enter&gt; word &lt;enter&gt;</code> to visualize whole word</li>
 					<li>Click/touch/wait/spacebar for a random thought</li>
 				</ul>
@@ -35,11 +32,11 @@
 					<li><a href="http://en.wikipedia.org/wiki/Harmonium_%28fictional_creature%29">Harmoniums</a> were 
 					created by <a href="http://en.wikipedia.org/wiki/Kurt_Vonnegut">Kurt Vonnegut</a> in his book 
 					<a href="http://en.wikipedia.org/wiki/The_Sirens_of_Titan">The Sirens of Titan</a></li>
-					<li>Harmoniums do not use images and are not drawn into a canvas</li>
+					<li>You need a WebGL-enabled web browser to view Harmoniums</li>
 					<li>This is just another useless creation by <a href="http://ondras.zarovi.cz/">Ondřej Žára</a></li>
 				</ul>
 			</div>
-			<p style="clear:both"></p>
 		</div>
+		<script>App.init();</script>
 	</body>
 </html>
