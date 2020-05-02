@@ -36,8 +36,7 @@ function onKeypress(e) {
 	}
 
 	if (e.charCode == 32 || e.keyCode == 32) {
-		// random();
-		drawShape(new Shape.Spiral());
+		random();
 		return;
 	}
 
