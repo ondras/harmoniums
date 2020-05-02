@@ -1,62 +1,94 @@
-var Program = function(gl, vsSource, fsSource) {
-	this._gl = gl;
-	this.attributes = {};
-	this._uniforms = {};
+export default class Program {
+	constructor(gl, vsSource, fsSource) {
+		this._gl = gl;
+		this.attributes = {};
+		this._uniforms = {};
 
-	var vs = this._shaderFromString(gl.VERTEX_SHADER, vsSource);
-	var fs = this._shaderFromString(gl.FRAGMENT_SHADER, fsSource);
+		const vs = shaderFromString(gl, gl.VERTEX_SHADER, vsSource);
+		const fs = shaderFromString(gl, gl.FRAGMENT_SHADER, fsSource);
 
-	var program = gl.createProgram();
-	gl.attachShader(program, vs);
-	gl.attachShader(program, fs);
-	gl.linkProgram(program);
+		const program = gl.createProgram();
+		gl.attachShader(program, vs);
+		gl.attachShader(program, fs);
+		gl.linkProgram(program);
 
-	if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-		throw new Error("Could not link the shader program");
+		if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { throw new Error("Could not link the shader program"); }
+
+		gl.deleteShader(vs);
+		gl.deleteShader(fs);
+
+		const aCount = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+		for (let i=0; i<aCount; i++) {
+			const info = gl.getActiveAttrib(program, i);
+			this.attributes[info.name] = gl.getAttribLocation(program, info.name);
+		}
+
+		const uCount = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+		for (let i=0; i<uCount; i++) {
+			const info = gl.getActiveUniform(program, i);
+			this._uniforms[info.name] = createUniformSetter(gl, info, program);
+		}
+
+		this._program = program;
 	}
 
-	gl.deleteShader(vs);
-	gl.deleteShader(fs);
+	use() {
+		const gl = this._gl;
+		gl.useProgram(this._program);
 
-	var count = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-	for (var i=0; i<count; i++) {
-		var info = gl.getActiveAttrib(program, i);
-		this.attributes[info.name] = gl.getAttribLocation(program, info.name);
+		for (let p in this.attributes) { gl.enableVertexAttribArray(this.attributes[p]); }
 	}
 
-	var count = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-	for (var i=0; i<count; i++) {
-		var info = gl.getActiveUniform(program, i);
-		this._uniforms[info.name] = this._uniformSetter(info, program);
+	destroy() {
+		this._gl.deleteProgram(this._program);
 	}
 
-	this._program = program;
-}
-
-Program.prototype.use = function() {
-	var gl = this._gl;
-	gl.useProgram(this._program);
-
-	for (var p in this.attributes) { 
-		gl.enableVertexAttribArray(this.attributes[p]);
+	uniform(name, value) {
+		this._uniforms[name](value);
 	}
 }
 
-Program.prototype.destroy = function() {
-	this._gl.deleteProgram(this._program);
+/*
+function shaderFromId(gl, id) {
+	let node = document.querySelector("#" + id);
+	if (!node) { throw new Error("Cannot find shader for ID '"+id+"'"); }
+
+	let src = "";
+	let child = node.firstChild;
+
+	while (child) {
+		if (child.nodeType == child.TEXT_NODE) { src += child.textContent; }
+		child = child.nextSibling;
+	}
+
+	if (node.type == "x-shader/x-fragment") {
+		let type = gl.FRAGMENT_SHADER;
+	} else if (node.type == "x-shader/x-vertex") {
+		let type = gl.VERTEX_SHADER;
+	} else {
+		throw new Error("Unknown shader type '" + node.type +"'");
+	}
+
+	return shaderFromString(gl, type, src);
+}
+*/
+
+function shaderFromString(gl, type, str) {
+	const shader = gl.createShader(type);
+	gl.shaderSource(shader, str);
+	gl.compileShader(shader);
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+		throw new Error("Could not compile shader: " + gl.getShaderInfoLog(shader));
+	}
+	return shader;
 }
 
-Program.prototype.uniform = function(name, value) {
-	this._uniforms[name](value);
-}
+function createUniformSetter(gl, info, program) {
+	const location = gl.getUniformLocation(program, info.name);
 
-Program.prototype._uniformSetter = function(info, program) {
-	var gl = this._gl;
-	var location = gl.getUniformLocation(program, info.name);
-
-	var type = info.type;
+	const type = info.type;
 	// Check if this uniform is an array
-	var isArray = (info.size > 1 && info.name.substr(-3) == "[0]");
+	const isArray = (info.size > 1 && info.name.substr(-3) == "[0]");
 	if (type == gl.FLOAT && isArray)
 		return function(v) { gl.uniform1fv(location, v); };
 	if (type == gl.FLOAT)
@@ -91,11 +123,11 @@ Program.prototype._uniformSetter = function(info, program) {
 		return function(v) { gl.uniformMatrix3fv(location, false, v); };
 	if (type == gl.FLOAT_MAT4)
 		return function(v) { gl.uniformMatrix4fv(location, false, v); };
+/*
 	if ((type == gl.SAMPLER_2D || type == gl.SAMPLER_CUBE) && isArray) {
-		var units = [];
-		for (var i = 0; i < info.size; i++) {
-			units.push(textureUnit++);
-		}
+		let units = [];
+		for (let i = 0; i < info.size; i++) { units.push(textureUnit++); }
+
 		return function(bindPoint, units) {
 			return function(textures) {
 				gl.uniform1iv(location, units);
@@ -114,43 +146,6 @@ Program.prototype._uniformSetter = function(info, program) {
 				gl.bindTexture(bindPoint, texture);
 			};
 		}(getBindPointForSamplerType(gl, type), textureUnit++);
-	
-	throw ("Unknown uniform type: 0x" + type.toString(16));
-}
-
-Program.prototype._shaderFromId = function(id) {
-	var node = document.querySelector("#" + id);
-	if (!node) { throw new Error("Cannot find shader for ID '"+id+"'"); }
-
-	var gl = this._gl;
-
-	var src = "";
-	var child = node.firstChild;
-
-	while (child) {
-		if (child.nodeType == child.TEXT_NODE) { src += child.textContent; }
-		child = child.nextSibling;
-	}
-
-	if (node.type == "x-shader/x-fragment") {
-		var type = gl.FRAGMENT_SHADER;
-	} else if (node.type == "x-shader/x-vertex") {
-		var type = gl.VERTEX_SHADER;
-	} else {
-		throw new Error("Unknown shader type '" + node.type +"'");
-	}
-
-	return this._shaderFromString(type, src);
-}
-
-Program.prototype._shaderFromString = function(type, str) {
-	var gl = this._gl;
-
-	var shader = gl.createShader(type);
-	gl.shaderSource(shader, str);
-	gl.compileShader(shader);
-	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-		throw new Error("Could not compile shader: " + gl.getShaderInfoLog(shader));
-	}
-	return shader;
+*/
+	throw new Error("Unknown uniform type: 0x" + type.toString(16));
 }
